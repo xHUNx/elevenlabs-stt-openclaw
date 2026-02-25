@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+set +m  # disable job control messages
 
 # Live Listener: mic → ElevenLabs realtime STT → optional response/TTS
 # Requires: ffmpeg, websocat, python3
@@ -86,9 +87,12 @@ while true; do
       python3 "$STREAMER" &
       STREAM_PID=$!
       listening=1
+      echo "Listening…" >&2
     else
       kill "$STREAM_PID" 2>/dev/null || true
+      wait "$STREAM_PID" 2>/dev/null || true
       listening=0
+      echo "Stopped listening." >&2
     fi
   fi
   sleep 0.05

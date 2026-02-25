@@ -63,8 +63,18 @@ def tts_elevenlabs(text):
     ]
     with open(tmp.name, "wb") as f:
         subprocess.run(tts_cmd, stdout=f, stderr=subprocess.DEVNULL)
-    if os.path.getsize(tmp.name) > 0:
+
+    # Validate MP3 header (avoid AudioFileOpen errors on bad payloads)
+    try:
+        if os.path.getsize(tmp.name) < 4:
+            return
+        with open(tmp.name, "rb") as f:
+            head = f.read(3)
+        if head not in (b"ID3", b"\xff\xfb", b"\xff\xf3", b"\xff\xf2"):
+            return
         subprocess.Popen(["afplay", tmp.name])
+    except Exception:
+        return
 
 
 def speak(text):
