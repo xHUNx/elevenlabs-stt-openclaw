@@ -76,9 +76,12 @@ def speak(text):
         tts_elevenlabs(text)
 
 chunk = ffmpeg.stdout.read(chunk_bytes)
+count = 0
 while chunk:
     next_chunk = ffmpeg.stdout.read(chunk_bytes)
-    commit = False if next_chunk else True
+    count += 1
+    # Force periodic commits so we actually receive committed transcripts
+    commit = True if (count % 10 == 0) else False
     b64 = base64.b64encode(chunk).decode("ascii")
     msg = {
         "message_type": "input_audio_chunk",
