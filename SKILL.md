@@ -1,13 +1,13 @@
 ---
 name: eleven-stt
-description: Transcribe audio files with ElevenLabs Speech-to-Text (Scribe v2) from the local CLI. Use when you need local transcription via curl/jq with diarization, language hinting, or JSON output.
+description: Transcribe audio files with ElevenLabs Speech-to-Text (Scribe v2) from the local CLI. Supports diarization, events, JSON output, webhooks, and advanced STT options.
 ---
 
 # ElevenLabs Speech-to-Text (Local CLI)
 
 ## Use
 
-Run the script in `scripts/transcribe.sh` with an audio file path and optional flags.
+Run the script in `scripts/transcribe.sh` with an audio file path or URL.
 
 Examples:
 
@@ -15,7 +15,8 @@ Examples:
 scripts/transcribe.sh /path/to/audio.mp3
 scripts/transcribe.sh /path/to/audio.mp3 --diarize --lang en
 scripts/transcribe.sh /path/to/audio.mp3 --json
-scripts/transcribe.sh /path/to/audio.mp3 --model flash_v2.5
+scripts/transcribe.sh /path/to/audio.mp3 --webhook --webhook-metadata '{"job":"call-001"}'
+scripts/transcribe.sh --url https://example.com/audio.mp3 --lang en
 ```
 
 ## Environment
@@ -26,3 +27,4 @@ Set `ELEVENLABS_API_KEY` in your shell or OpenClaw env before running.
 
 - Defaults to `scribe_v2` (the Speech-to-Text model) and uses a filesystem lock to avoid parallel requests.
 - Requires `curl` and `jq`.
+- For async workflows, use `--webhook` with optional `--webhook-id` and `--webhook-metadata`.

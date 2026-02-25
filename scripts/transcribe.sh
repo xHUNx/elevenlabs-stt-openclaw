@@ -24,21 +24,38 @@ show_help() {
     cat << EOF
 Usage: $(basename "$0") <audio_file> [options]
 
-Options:
-  --diarize        Enable speaker diarization
-  --lang CODE      ISO language code (e.g., en, pt, es, fr)
-  --json           Output full JSON response
-  --events         Tag audio events (laughter, music, etc.)
-  --model MODEL    Specify the ElevenLabs model (default: scribe_v2)
-  -h, --help       Show this help
+Core options:
+  --diarize                 Enable speaker diarization
+  --lang CODE               ISO language code (e.g., en, hu, es)
+  --json                    Output full JSON response
+  --events                  Tag audio events (laughter, music, etc.)
+  --model MODEL             STT model (default: scribe_v2)
+
+Async / webhook options:
+  --webhook                 Enable async processing (webhook delivery)
+  --webhook-id ID           Send to a specific webhook ID
+  --webhook-metadata JSON   JSON string to attach to webhook callback
+
+Advanced options:
+  --timestamps MODE         none|word|character (default: word)
+  --num-speakers N          Max speakers (1-32)
+  --diarization-threshold X Diarization threshold (0-1)
+  --use-multi-channel       Split multi-channel audio
+  --entity-detection MODE   e.g. all|pii|phi|pci|offensive_language
+  --keyterms "a,b,c"         Comma-separated keyterms (<=100)
+  --enable-logging BOOL     true|false (default: true)
+  --url HTTPS_URL           Transcribe via cloud URL instead of file
+
+  -h, --help                Show this help
 
 Environment:
   ELEVENLABS_API_KEY  Required API key
 
 Examples:
   $(basename "$0") voice_note.ogg
-  $(basename "$0") meeting.mp3 --diarize --lang en --model flash_v2.5
-  $(basename "$0") podcast.mp3 --json > transcript.json
+  $(basename "$0") meeting.mp3 --diarize --lang en --json
+  $(basename "$0") audio.wav --webhook --webhook-id abc123
+  $(basename "$0") --url https://example.com/audio.mp3 --lang en
 EOF
     exit 0
 }
@@ -49,6 +66,17 @@ LANG_CODE=""
 JSON_OUTPUT="false"
 TAG_EVENTS="false"
 MODEL_ID="scribe_v2"
+TIMESTAMPS="word"
+NUM_SPEAKERS=""
+DIARIZATION_THRESHOLD=""
+USE_MULTI_CHANNEL="false"
+ENTITY_DETECTION=""
+KEYTERMS=""
+ENABLE_LOGGING="true"
+WEBHOOK="false"
+WEBHOOK_ID=""
+WEBHOOK_METADATA=""
+CLOUD_URL=""
 FILE=""
 
 # Parse arguments
@@ -60,23 +88,34 @@ while [[ $# -gt 0 ]]; do
         --json) JSON_OUTPUT="true"; shift ;;
         --events) TAG_EVENTS="true"; shift ;;
         --model) MODEL_ID="$2"; shift 2 ;;
+        --timestamps) TIMESTAMPS="$2"; shift 2 ;;
+        --num-speakers) NUM_SPEAKERS="$2"; shift 2 ;;
+        --diarization-threshold) DIARIZATION_THRESHOLD="$2"; shift 2 ;;
+        --use-multi-channel) USE_MULTI_CHANNEL="true"; shift ;;
+        --entity-detection) ENTITY_DETECTION="$2"; shift 2 ;;
+        --keyterms) KEYTERMS="$2"; shift 2 ;;
+        --enable-logging) ENABLE_LOGGING="$2"; shift 2 ;;
+        --webhook) WEBHOOK="true"; shift ;;
+        --webhook-id) WEBHOOK_ID="$2"; shift 2 ;;
+        --webhook-metadata) WEBHOOK_METADATA="$2"; shift 2 ;;
+        --url) CLOUD_URL="$2"; shift 2 ;;
         -*) echo "Unknown option: $1" >&2; exit 1 ;;
         *) FILE="$1"; shift ;;
     esac
 done
 
-# Validate
-if [[ -z "$FILE" ]]; then
-    echo "Error: No audio file specified" >&2
+# Validate inputs
+if [[ -z "$FILE" && -z "$CLOUD_URL" ]]; then
+    echo "Error: Provide a file path or --url" >&2
     show_help
 fi
 
-if [[ ! -f "$FILE" ]]; then
+if [[ -n "$FILE" && ! -f "$FILE" ]]; then
     echo "Error: File not found: $FILE" >&2
     exit 1
 fi
 
-# API key (check env, then fall back to skill config)
+# API key
 API_KEY="${ELEVENLABS_API_KEY:-}"
 if [[ -z "$API_KEY" ]]; then
     echo "Error: ELEVENLABS_API_KEY not set" >&2
@@ -89,14 +128,47 @@ CURL_ARGS=(
     -X POST
     "https://api.elevenlabs.io/v1/speech-to-text"
     -H "xi-api-key: $API_KEY"
-    -F "file=@$FILE"
     -F "model_id=$MODEL_ID"
     -F "diarize=$DIARIZE"
     -F "tag_audio_events=$TAG_EVENTS"
+    -F "timestamps_granularity=$TIMESTAMPS"
+    -F "enable_logging=$ENABLE_LOGGING"
+    -F "use_multi_channel=$USE_MULTI_CHANNEL"
+    -F "webhook=$WEBHOOK"
 )
+
+if [[ -n "$FILE" ]]; then
+    CURL_ARGS+=(-F "file=@$FILE")
+elif [[ -n "$CLOUD_URL" ]]; then
+    CURL_ARGS+=(-F "cloud_storage_url=$CLOUD_URL")
+fi
 
 if [[ -n "$LANG_CODE" ]]; then
     CURL_ARGS+=(-F "language_code=$LANG_CODE")
+fi
+
+if [[ -n "$NUM_SPEAKERS" ]]; then
+    CURL_ARGS+=(-F "num_speakers=$NUM_SPEAKERS")
+fi
+
+if [[ -n "$DIARIZATION_THRESHOLD" ]]; then
+    CURL_ARGS+=(-F "diarization_threshold=$DIARIZATION_THRESHOLD")
+fi
+
+if [[ -n "$ENTITY_DETECTION" ]]; then
+    CURL_ARGS+=(-F "entity_detection=$ENTITY_DETECTION")
+fi
+
+if [[ -n "$KEYTERMS" ]]; then
+    CURL_ARGS+=(-F "keyterms=$KEYTERMS")
+fi
+
+if [[ -n "$WEBHOOK_ID" ]]; then
+    CURL_ARGS+=(-F "webhook_id=$WEBHOOK_ID")
+fi
+
+if [[ -n "$WEBHOOK_METADATA" ]]; then
+    CURL_ARGS+=(-F "webhook_metadata=$WEBHOOK_METADATA")
 fi
 
 # Make request
