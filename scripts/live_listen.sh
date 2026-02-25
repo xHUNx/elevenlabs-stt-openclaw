@@ -61,7 +61,9 @@ if [[ "$MODE" == "push" ]]; then
   else
     echo "Press $PUSH_KEY to start listening..." >&2
     while true; do
-      IFS= read -r -n1 -s key
+      stty -echo
+      IFS= read -r -n1 key
+      stty echo
       key_up=$(printf "%s" "$key" | tr '[:lower:]' '[:upper:]')
       push_up=$(printf "%s" "$PUSH_KEY" | tr '[:lower:]' '[:upper:]')
       if [[ "$key_up" == "$push_up" ]]; then
