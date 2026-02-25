@@ -29,7 +29,7 @@ ffmpeg_cmd = [
     "-f", "avfoundation", "-i", DEVICE,
     "-ac", "1", "-ar", str(sample_rate), "-f", "s16le", "pipe:1"
 ]
-ffmpeg = subprocess.Popen(ffmpeg_cmd, stdout=subprocess.PIPE)
+ffmpeg = subprocess.Popen(ffmpeg_cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
 # websocat websocket
 ws = subprocess.Popen([
