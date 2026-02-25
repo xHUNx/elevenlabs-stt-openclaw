@@ -142,13 +142,34 @@ Error: Another transcription is currently running. Please wait a moment.
 
 ## ⚡ Realtime Streaming (WebSocket)
 
-A turnkey streamer is included: `scripts/realtime.sh`. It converts any audio file to 16k mono PCM, chunks it, and streams it to ElevenLabs over WebSocket using `scribe_v2_realtime`.
+Two realtime options are included:
 
-**Requires:** `ffmpeg` + `websocat`
+### 1) File streamer
+
+`realtime.sh` converts any audio file to 16k mono PCM, chunks it, and streams it to ElevenLabs over WebSocket using `scribe_v2_realtime`.
 
 ```bash
 brew install ffmpeg websocat
 scripts/realtime.sh /path/to/audio.ogg
 ```
 
-You’ll receive partial/committed transcripts back in the WebSocket output.
+### 2) Live listener (mic)
+
+`live_listen.sh` streams your **microphone** into ElevenLabs realtime STT and can **speak back** using TTS.
+
+```bash
+brew install ffmpeg websocat
+
+# Always-on, ElevenLabs TTS response
+scripts/live_listen.sh --mode always --tts elevenlabs
+
+# Push-to-talk, macOS say() voice
+scripts/live_listen.sh --mode push --tts say
+```
+
+Options:
+- `--mode always|push`
+- `--tts elevenlabs|say|none`
+- `--device :0` (macOS avfoundation device)
+- `--lang en` (optional language hint)
+- `--voice-id <ID>` (ElevenLabs voice ID)
