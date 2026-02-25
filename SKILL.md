@@ -28,4 +28,4 @@ Set `ELEVENLABS_API_KEY` in your shell or OpenClaw env before running.
 - Defaults to `scribe_v2` (the Speech-to-Text model) and uses a filesystem lock to avoid parallel requests.
 - Requires `curl` and `jq`.
 - For async workflows, use `--webhook` with optional `--webhook-id` and `--webhook-metadata`.
-- Realtime streaming is available via `scripts/realtime.sh` (requires `ffmpeg` + `websocat`).
+- Realtime streaming is available via `scripts/realtime.sh` (requires `ffmpeg` + `websocat`) and uses the `scribe_v2_realtime` model.

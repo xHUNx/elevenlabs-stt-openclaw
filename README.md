@@ -142,7 +142,7 @@ Error: Another transcription is currently running. Please wait a moment.
 
 ## ⚡ Realtime Streaming (WebSocket)
 
-A turnkey streamer is included: `scripts/realtime.sh`. It converts any audio file to 16k mono PCM, chunks it, and streams it to ElevenLabs over WebSocket.
+A turnkey streamer is included: `scripts/realtime.sh`. It converts any audio file to 16k mono PCM, chunks it, and streams it to ElevenLabs over WebSocket using `scribe_v2_realtime`.
 
 **Requires:** `ffmpeg` + `websocat`
 

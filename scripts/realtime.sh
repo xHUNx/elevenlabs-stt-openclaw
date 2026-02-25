@@ -24,7 +24,7 @@ if [[ -z "$FILE" || ! -f "$FILE" ]]; then
   exit 1
 fi
 
-MODEL_ID="scribe_v2"
+MODEL_ID="scribe_v2_realtime"
 AUDIO_FORMAT="pcm_16000" # 16k mono PCM
 CHUNK_MS="200"
 
@@ -32,9 +32,8 @@ WS_URL="wss://api.elevenlabs.io/v1/speech-to-text/realtime?model_id=${MODEL_ID}&
 
 # Convert to raw PCM and stream as base64 JSON chunks
 python3 - <<'PY' "$FILE" "$CHUNK_MS" | \
-  websocat -H "xi-api-key: ${ELEVENLABS_API_KEY}" "$WS_URL"
-import sys, base64, json, subprocess, math
-from pathlib import Path
+  websocat "$WS_URL" -t -H "xi-api-key: ${ELEVENLABS_API_KEY}"
+import sys, base64, json, subprocess
 
 file_path = sys.argv[1]
 chunk_ms = int(sys.argv[2])
@@ -53,15 +52,18 @@ cmd = [
 ]
 proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 
-# Stream chunks
-while True:
-    chunk = proc.stdout.read(chunk_bytes)
-    if not chunk:
-        break
+# Stream chunks (commit on final chunk)
+chunk = proc.stdout.read(chunk_bytes)
+while chunk:
+    next_chunk = proc.stdout.read(chunk_bytes)
+    commit = False if next_chunk else True
     b64 = base64.b64encode(chunk).decode("ascii")
-    msg = {"message_type": "input_audio_chunk", "audio_chunk": b64}
+    msg = {
+        "message_type": "input_audio_chunk",
+        "audio_base_64": b64,
+        "commit": commit,
+        "sample_rate": sample_rate,
+    }
     print(json.dumps(msg), flush=True)
-
-# Signal end of stream
-print(json.dumps({"message_type": "end_of_stream"}), flush=True)
+    chunk = next_chunk
 PY
