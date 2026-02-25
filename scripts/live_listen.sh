@@ -9,6 +9,7 @@ TTS_ENGINE="elevenlabs"  # elevenlabs | say | none
 DEVICE=":0"     # avfoundation device string (macOS)
 LANG_CODE=""    # optional language code
 VOICE_ID="${ELEVENLABS_VOICE_ID:-WNxHBFUm0NC5fojx98kr}"
+PUSH_KEY="ENTER" # when --mode push, wait for this key (e.g., Q)
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -17,6 +18,7 @@ while [[ $# -gt 0 ]]; do
     --device) DEVICE="$2"; shift 2 ;;
     --lang) LANG_CODE="$2"; shift 2 ;;
     --voice-id) VOICE_ID="$2"; shift 2 ;;
+    --key) PUSH_KEY="$2"; shift 2 ;;
     -h|--help)
       cat << EOF2
 Usage: $(basename "$0") [options]
@@ -27,6 +29,7 @@ Options:
   --device DEVICE           Mic device for ffmpeg (default: :0)
   --lang CODE               Language code hint (optional)
   --voice-id ID             ElevenLabs voice ID for TTS
+  --key KEY                 Push-to-talk key (default: ENTER)
 
 Examples:
   $(basename "$0") --mode always --tts elevenlabs
@@ -52,8 +55,18 @@ if [[ -z "${ELEVENLABS_API_KEY:-}" ]]; then
 fi
 
 if [[ "$MODE" == "push" ]]; then
-  echo "Press ENTER to start listening..." >&2
-  read -r
+  if [[ "$PUSH_KEY" == "ENTER" ]]; then
+    echo "Press ENTER to start listening..." >&2
+    read -r
+  else
+    echo "Press $PUSH_KEY to start listening..." >&2
+    while true; do
+      IFS= read -r -n1 -s key
+      if [[ "${key^^}" == "${PUSH_KEY^^}" ]]; then
+        break
+      fi
+    done
+  fi
 fi
 
 MODEL_ID="scribe_v2_realtime"

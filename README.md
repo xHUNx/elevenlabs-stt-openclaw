@@ -165,6 +165,9 @@ scripts/live_listen.sh --mode always --tts elevenlabs
 
 # Push-to-talk, macOS say() voice
 scripts/live_listen.sh --mode push --tts say
+
+# Push-to-talk on Q
+scripts/live_listen.sh --mode push --tts elevenlabs --key Q
 ```
 
 Options:
