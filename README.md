@@ -142,4 +142,13 @@ Error: Another transcription is currently running. Please wait a moment.
 
 ## ⚡ Realtime Streaming (WebSocket)
 
-Realtime streaming is supported by ElevenLabs via WebSocket. This repo doesn’t bundle a dedicated streamer yet, but you can use any WS client (e.g., `websocat`/`wscat`) to send `input_audio_chunk` messages and receive partial/committed transcripts. If you want me to add a turnkey `scripts/realtime.sh` streamer, say the word and I’ll wire it in.
+A turnkey streamer is included: `scripts/realtime.sh`. It converts any audio file to 16k mono PCM, chunks it, and streams it to ElevenLabs over WebSocket.
+
+**Requires:** `ffmpeg` + `websocat`
+
+```bash
+brew install ffmpeg websocat
+scripts/realtime.sh /path/to/audio.ogg
+```
+
+You’ll receive partial/committed transcripts back in the WebSocket output.
