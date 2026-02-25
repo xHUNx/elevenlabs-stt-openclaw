@@ -155,7 +155,7 @@ scripts/realtime.sh /path/to/audio.ogg
 
 ### 2) Live listener (mic)
 
-`live_listen.sh` streams your **microphone** into ElevenLabs realtime STT and can **speak back** using TTS. It supports **toggle** (press key to start/stop) or **always‑on**.
+`live_listen.sh` streams your **microphone** into ElevenLabs realtime STT and can **speak back** using TTS. It supports **toggle** (press key to start/stop) or **always‑on**. Toggle mode now runs a separate streaming process for stability.
 
 ```bash
 brew install ffmpeg websocat
