@@ -51,7 +51,8 @@ def tts_say(text):
 
 def tts_elevenlabs(text):
     if not VOICE_ID:
-        return
+        print("[tts] No ELEVENLABS_VOICE_ID set", file=sys.stderr)
+        return False
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
     tmp.close()
     tts_cmd = [
@@ -67,14 +68,15 @@ def tts_elevenlabs(text):
     # Validate MP3 header (avoid AudioFileOpen errors on bad payloads)
     try:
         if os.path.getsize(tmp.name) < 4:
-            return
+            return False
         with open(tmp.name, "rb") as f:
             head = f.read(3)
         if head not in (b"ID3", b"\xff\xfb", b"\xff\xf3", b"\xff\xf2"):
-            return
+            return False
         subprocess.Popen(["afplay", tmp.name])
+        return True
     except Exception:
-        return
+        return False
 
 
 def speak(text):
@@ -83,10 +85,14 @@ def speak(text):
     if TTS_ENGINE == "say":
         tts_say(text)
     elif TTS_ENGINE == "elevenlabs":
-        tts_elevenlabs(text)
+        ok = tts_elevenlabs(text)
+        if not ok:
+            # Fallback to say so user hears *something*
+            tts_say(text)
 
 chunk = ffmpeg.stdout.read(chunk_bytes)
 count = 0
+last_text = ""
 while chunk:
     next_chunk = ffmpeg.stdout.read(chunk_bytes)
     count += 1
@@ -113,7 +119,8 @@ while chunk:
         mtype = data.get("message_type", "")
         if mtype in ("committed_transcript", "committed_transcript_with_timestamps"):
             text = data.get("text", "")
-            if text:
+            if text and text != last_text:
+                last_text = text
                 print(text, flush=True)
                 speak(text)
 
