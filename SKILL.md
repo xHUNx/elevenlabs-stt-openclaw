@@ -1,6 +1,7 @@
 ---
 name: eleven-stt
 description: Transcribe audio files with ElevenLabs Speech-to-Text (Scribe v2) from the local CLI. Supports diarization, events, JSON output, webhooks, and advanced STT options.
+metadata: {"openclaw":{"requires":{"bins":["curl","jq","python3","ffmpeg","websocat"],"env":["ELEVENLABS_API_KEY"]}}}
 ---
 
 # ElevenLabs Speech-to-Text (Local CLI)

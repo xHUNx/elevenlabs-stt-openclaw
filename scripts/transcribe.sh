@@ -1,14 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [[ -f "$SCRIPT_DIR/.env" ]]; then
-    set -a
-    # shellcheck source=/dev/null
-    source "$SCRIPT_DIR/.env"
-    set +a
-fi
-
 LOCK_DIR="/tmp/eleven-stt.lock"
 if ! mkdir "$LOCK_DIR" 2>/dev/null; then
     echo "Error: Another transcription is currently running. Please wait a moment." >&2

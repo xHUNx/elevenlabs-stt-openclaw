@@ -15,6 +15,7 @@ A clean, local OpenClaw skill that transcribes audio with ElevenLabs Speech‑to
 - **Cloud URL input** (`--url https://...`) for hosted files
 - **Advanced controls**: timestamps granularity, entity detection, keyterms, multi‑channel
 - **Concurrency‑safe** via a filesystem lock (no parallel requests)
+- **No .env sourcing** — reads only explicit environment variables
 
 ---
 
@@ -22,6 +23,8 @@ A clean, local OpenClaw skill that transcribes audio with ElevenLabs Speech‑to
 
 - `curl`
 - `jq`
+- `python3` (for realtime/live listener)
+- `ffmpeg` + `websocat` (for realtime/live listener)
 - ElevenLabs API key set in environment:
 
 ```bash
