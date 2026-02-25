@@ -155,7 +155,7 @@ scripts/realtime.sh /path/to/audio.ogg
 
 ### 2) Live listener (mic)
 
-`live_listen.sh` streams your **microphone** into ElevenLabs realtime STT and can **speak back** using TTS.
+`live_listen.sh` streams your **microphone** into ElevenLabs realtime STT and can **speak back** using TTS. It supports **toggle** (press key to start/stop) or **always‑on**.
 
 ```bash
 brew install ffmpeg websocat
@@ -163,11 +163,14 @@ brew install ffmpeg websocat
 # Always-on, ElevenLabs TTS response
 scripts/live_listen.sh --mode always --tts elevenlabs
 
-# Push-to-talk, macOS say() voice
-scripts/live_listen.sh --mode push --tts say
+# Toggle mode, macOS say() voice
+scripts/live_listen.sh --mode toggle --tts say --key Q
+```
 
-# Push-to-talk on Q
-scripts/live_listen.sh --mode push --tts elevenlabs --key Q
+Optional response hook:
+```bash
+# Run a custom command on each final transcript
+scripts/live_listen.sh --mode toggle --on-transcript 'echo "$TEXT"'
 ```
 
 Options:
