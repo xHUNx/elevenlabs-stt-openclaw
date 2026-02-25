@@ -65,13 +65,27 @@ scripts/transcribe.sh /path/to/audio.ogg --model scribe_v1_experimental
 
 ## 🛰️ Webhooks (Async)
 
-Use webhooks if you want the job to run asynchronously and receive results later.
+Use webhooks if you want the job to run asynchronously and receive results later. This is ideal for longer files or when you don’t want to block the CLI while transcription runs.
 
 ```bash
 scripts/transcribe.sh /path/to/audio.ogg --webhook
 scripts/transcribe.sh /path/to/audio.ogg --webhook --webhook-id abc123 \
   --webhook-metadata '{"job":"call-001","owner":"dan"}'
 ```
+
+### Quick test (Beeceptor)
+
+1. Create a Beeceptor endpoint (or any HTTPS webhook URL).
+2. Add it in ElevenLabs → Webhooks and enable **Transcription completed**.
+3. Copy the **Webhook ID** from ElevenLabs.
+4. Run:
+
+```bash
+scripts/transcribe.sh /path/to/audio.ogg --webhook --webhook-id <ID> \
+  --webhook-metadata '{"test":"beeceptor"}'
+```
+
+You’ll see the payload arrive in Beeceptor within ~1–2 minutes.
 
 ---
 
