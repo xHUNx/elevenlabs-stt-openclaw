@@ -123,7 +123,7 @@ def tts_say(text):
 def tts_elevenlabs(text):
     if not VOICE_ID:
         return
-    # Stream TTS to temp mp3 then play
+    # Stream TTS to temp mp3 then play (guard empty responses)
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
     tmp.close()
     tts_cmd = [
@@ -135,7 +135,8 @@ def tts_elevenlabs(text):
     ]
     with open(tmp.name, "wb") as f:
         subprocess.run(tts_cmd, stdout=f, stderr=subprocess.DEVNULL)
-    subprocess.Popen(["afplay", tmp.name])
+    if os.path.getsize(tmp.name) > 0:
+        subprocess.Popen(["afplay", tmp.name])
 
 
 def speak(text):
