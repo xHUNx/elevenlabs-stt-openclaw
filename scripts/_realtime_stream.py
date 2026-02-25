@@ -46,7 +46,8 @@ threading.Thread(target=reader, daemon=True).start()
 
 
 def tts_say(text):
-    subprocess.Popen(["say", text])
+    # Use -- to avoid option injection
+    subprocess.Popen(["say", "--", text])
 
 
 def tts_elevenlabs(text):

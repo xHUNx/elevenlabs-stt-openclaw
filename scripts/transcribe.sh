@@ -102,9 +102,26 @@ if [[ -z "$FILE" && -z "$CLOUD_URL" ]]; then
     show_help
 fi
 
-if [[ -n "$FILE" && ! -f "$FILE" ]]; then
-    echo "Error: File not found: $FILE" >&2
-    exit 1
+if [[ -n "$FILE" ]]; then
+    if [[ ! -f "$FILE" ]]; then
+        echo "Error: File not found: $FILE" >&2
+        exit 1
+    fi
+    if [[ "${ALLOW_LOCAL_FILE:-false}" != "true" ]]; then
+        echo "Error: Local file usage requires ALLOW_LOCAL_FILE=true" >&2
+        exit 1
+    fi
+fi
+
+if [[ -n "$CLOUD_URL" ]]; then
+    if [[ ! "$CLOUD_URL" =~ ^https:// ]]; then
+        echo "Error: --url must start with https://" >&2
+        exit 1
+    fi
+    if [[ "$CLOUD_URL" =~ [[:space:]] ]]; then
+        echo "Error: --url must not contain spaces" >&2
+        exit 1
+    fi
 fi
 
 # API key
@@ -160,6 +177,10 @@ if [[ -n "$WEBHOOK_ID" ]]; then
 fi
 
 if [[ -n "$WEBHOOK_METADATA" ]]; then
+    if ! echo "$WEBHOOK_METADATA" | jq -e . >/dev/null 2>&1; then
+        echo "Error: --webhook-metadata must be valid JSON" >&2
+        exit 1
+    fi
     CURL_ARGS+=(-F "webhook_metadata=$WEBHOOK_METADATA")
 fi
 

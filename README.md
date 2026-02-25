@@ -29,6 +29,7 @@ A clean, local OpenClaw skill that transcribes audio with ElevenLabs Speech‑to
 
 ```bash
 export ELEVENLABS_API_KEY="sk_..."
+export ALLOW_LOCAL_FILE=true   # required to transcribe local files
 ```
 
 ---
@@ -38,17 +39,17 @@ export ELEVENLABS_API_KEY="sk_..."
 From inside the skill folder:
 
 ```bash
-# Basic transcription
-scripts/transcribe.sh /path/to/audio.ogg
+# Basic transcription (local file)
+ALLOW_LOCAL_FILE=true scripts/transcribe.sh /path/to/audio.ogg
 
 # Diarization + language hint
-scripts/transcribe.sh /path/to/audio.ogg --diarize --lang en
+ALLOW_LOCAL_FILE=true scripts/transcribe.sh /path/to/audio.ogg --diarize --lang en
 
 # JSON output with word timings
-scripts/transcribe.sh /path/to/audio.ogg --json
+ALLOW_LOCAL_FILE=true scripts/transcribe.sh /path/to/audio.ogg --json
 
 # Audio‑event tagging
-scripts/transcribe.sh /path/to/audio.ogg --events
+ALLOW_LOCAL_FILE=true scripts/transcribe.sh /path/to/audio.ogg --events
 ```
 
 ### Model override
