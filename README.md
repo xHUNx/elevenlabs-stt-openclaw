@@ -140,4 +140,6 @@ Error: Another transcription is currently running. Please wait a moment.
 
 ---
 
-If you want realtime streaming (WebSocket) or auto‑registration of webhooks, I can add those too.
+## ⚡ Realtime Streaming (WebSocket)
+
+Realtime streaming is supported by ElevenLabs via WebSocket. This repo doesn’t bundle a dedicated streamer yet, but you can use any WS client (e.g., `websocat`/`wscat`) to send `input_audio_chunk` messages and receive partial/committed transcripts. If you want me to add a turnkey `scripts/realtime.sh` streamer, say the word and I’ll wire it in.
